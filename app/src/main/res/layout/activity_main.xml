@@ -58,7 +58,7 @@
         app:layout_constraintVertical_bias="0.639" />
 
     <TextView
-        android:id="@+id/textView4"
+        android:id="@+id/dayCounter"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:scaleX="2"

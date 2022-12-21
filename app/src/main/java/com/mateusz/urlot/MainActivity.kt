@@ -4,11 +4,13 @@ import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
+import android.widget.TextView
 import androidx.annotation.RequiresApi
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.snackbar.Snackbar
 import java.time.Instant
 import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 class MainActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
@@ -17,6 +19,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         val startButton = findViewById<Button>(R.id.startPlan)
+        val dayCounter = findViewById<TextView>(R.id.dayCounter)
 
         startButton.setOnClickListener {
             val drp = MaterialDatePicker.Builder.dateRangePicker()
@@ -40,6 +43,7 @@ class MainActivity : AppCompatActivity() {
                 val endDate = drp.selection?.second
                 // check if start date already passed
                 if (startDate!! < System.currentTimeMillis()) {
+                    dayCounter.text = "0 dni"
                     Snackbar.make(
                         findViewById(R.id.root),
                         "Nie można zaplanować podróży w przeszłości. Co ty myślisz, że my cudotwórcy?",
@@ -47,11 +51,16 @@ class MainActivity : AppCompatActivity() {
                     ).show()
                 } else {
                     // convert to local date using Instant
-                    val startLocalDate = Instant.ofEpochMilli(startDate).atZone(ZoneId.systemDefault()).toLocalDate()
-                    val endLocalDate = Instant.ofEpochMilli(endDate!!).atZone(ZoneId.systemDefault()).toLocalDate()
+                    // count how many days between start and end date
+                    val start = Instant.ofEpochMilli(startDate).atZone(ZoneId.systemDefault()).toLocalDate()
+                    val end = Instant.ofEpochMilli(endDate!!).atZone(ZoneId.systemDefault()).toLocalDate()
+                    val days = start.until(end).days
+                    dayCounter.text = "${days.toString()} dni"
+                    val startLocalDate = Instant.ofEpochMilli(startDate).atZone(ZoneId.of("Europe/Warsaw")).toLocalDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))
+                    val endLocalDate = Instant.ofEpochMilli(endDate!!).atZone(ZoneId.of("Europe/Warsaw")).toLocalDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))
                     Snackbar.make(
                         findViewById(R.id.root),
-                        "${startLocalDate} - ${endLocalDate}",
+                        "Poczekaj chwile, nasze gnomy właśnie obliczają twoją podróż w terminie od ${startLocalDate} do ${endLocalDate}",
                         Snackbar.LENGTH_SHORT
                     ).show()
                 }

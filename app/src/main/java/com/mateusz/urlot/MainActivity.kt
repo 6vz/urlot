@@ -28,10 +28,6 @@ class MainActivity : AppCompatActivity() {
         startButton.setOnClickListener {
             val drp = MaterialDatePicker.Builder.dateRangePicker()
                 .setTitleText("Select dates")
-                // limit only to 2 years from today
-                .setSelection(androidx.core.util.Pair(MaterialDatePicker.todayInUtcMilliseconds(), MaterialDatePicker.todayInUtcMilliseconds() + 63113904000))
-                    // disable days that already passed
-                .setInputMode(MaterialDatePicker.INPUT_MODE_CALENDAR)
                 .setSelection(
                     androidx.core.util.Pair(
                         MaterialDatePicker.thisMonthInUtcMilliseconds(),
@@ -40,17 +36,12 @@ class MainActivity : AppCompatActivity() {
 
                 )
                 .build()
-
-            // show date picker
             startButton.setOnClickListener {
                 drp.show(supportFragmentManager, "DATE_PICKER_TAG")
             }
-
-            // get selected dates
             drp.addOnPositiveButtonClickListener {
                 val startDate = drp.selection?.first
                 val endDate = drp.selection?.second
-                // check if start date already passed
                 if (startDate!! < System.currentTimeMillis()) {
                     dayCounter.text = "- dni"
                     fromPlaceholder.text = ""
@@ -61,7 +52,6 @@ class MainActivity : AppCompatActivity() {
                         "Nie można zaplanować podróży w przeszłości. Co ty myślisz, że my cudotwórcy?",
                         Snackbar.LENGTH_SHORT
                     ).show()
-                // else if from start or end date is more than 2 years away, cancel and send snackbar
                 } else if (startDate > System.currentTimeMillis() + 63113904000 || endDate!! > System.currentTimeMillis() + 63113904000) {
                     dayCounter.text = "- dni"
                     fromPlaceholder.text = ""
@@ -72,11 +62,10 @@ class MainActivity : AppCompatActivity() {
                         Snackbar.LENGTH_SHORT
                     ).show()
                 } else {
-                    // convert to local date using Instant
-                    // count how many days between start and end date
                     val start = Instant.ofEpochMilli(startDate).atZone(ZoneId.systemDefault()).toLocalDate()
                     val end = Instant.ofEpochMilli(endDate!!).atZone(ZoneId.systemDefault()).toLocalDate()
-                    val days = start.until(end).days
+                    // from miliseconds, count how many days between start and end
+                    val days = end.toEpochDay() - start.toEpochDay()
                     dayCounter.text = "${days.toString()} dni"
                     val startLocalDate = Instant.ofEpochMilli(startDate).atZone(ZoneId.of("Europe/Warsaw")).toLocalDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))
                     val endLocalDate = Instant.ofEpochMilli(endDate!!).atZone(ZoneId.of("Europe/Warsaw")).toLocalDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))

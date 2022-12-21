@@ -1,12 +1,17 @@
 package com.mateusz.urlot
 
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
+import androidx.annotation.RequiresApi
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.snackbar.Snackbar
+import java.time.Instant
+import java.time.ZoneId
 
 class MainActivity : AppCompatActivity() {
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -33,18 +38,21 @@ class MainActivity : AppCompatActivity() {
             drp.addOnPositiveButtonClickListener {
                 val startDate = drp.selection?.first
                 val endDate = drp.selection?.second
-                // check if person is not traveling in reverse, ie end date already passed
-                if (endDate!! < startDate!!) {
+                // check if start date already passed
+                if (startDate!! < System.currentTimeMillis()) {
                     Snackbar.make(
                         findViewById(R.id.root),
-                        "End date cannot be before start date",
-                        Snackbar.LENGTH_LONG
+                        "Nie można zaplanować podróży w przeszłości. Co ty myślisz, że my cudotwórcy?",
+                        Snackbar.LENGTH_SHORT
                     ).show()
                 } else {
+                    // convert to local date using Instant
+                    val startLocalDate = Instant.ofEpochMilli(startDate).atZone(ZoneId.systemDefault()).toLocalDate()
+                    val endLocalDate = Instant.ofEpochMilli(endDate!!).atZone(ZoneId.systemDefault()).toLocalDate()
                     Snackbar.make(
                         findViewById(R.id.root),
-                        "Start date: $startDate, End date: $endDate",
-                        Snackbar.LENGTH_LONG
+                        "${startLocalDate} - ${endLocalDate}",
+                        Snackbar.LENGTH_SHORT
                     ).show()
                 }
             }

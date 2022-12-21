@@ -24,11 +24,16 @@ class MainActivity : AppCompatActivity() {
         startButton.setOnClickListener {
             val drp = MaterialDatePicker.Builder.dateRangePicker()
                 .setTitleText("Select dates")
+                // limit only to 2 years from today
+                .setSelection(androidx.core.util.Pair(MaterialDatePicker.todayInUtcMilliseconds(), MaterialDatePicker.todayInUtcMilliseconds() + 63113904000))
+                    // disable days that already passed
+                .setInputMode(MaterialDatePicker.INPUT_MODE_CALENDAR)
                 .setSelection(
                     androidx.core.util.Pair(
                         MaterialDatePicker.thisMonthInUtcMilliseconds(),
                         MaterialDatePicker.todayInUtcMilliseconds()
                     )
+
                 )
                 .build()
 
@@ -47,6 +52,14 @@ class MainActivity : AppCompatActivity() {
                     Snackbar.make(
                         findViewById(R.id.root),
                         "Nie można zaplanować podróży w przeszłości. Co ty myślisz, że my cudotwórcy?",
+                        Snackbar.LENGTH_SHORT
+                    ).show()
+                // else if from start or end date is more than 2 years away, cancel and send snackbar
+                } else if (startDate > System.currentTimeMillis() + 63113904000 || endDate!! > System.currentTimeMillis() + 63113904000) {
+                    dayCounter.text = "0 dni"
+                    Snackbar.make(
+                        findViewById(R.id.root),
+                        "Nie możesz zaplanować podróży na więcej niż 2 lata w przyszłość",
                         Snackbar.LENGTH_SHORT
                     ).show()
                 } else {
